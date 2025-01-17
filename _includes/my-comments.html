@@ -1,5 +1,17 @@
 {% assign disqus = site.disqus | default:site.disqus_shortname %}
 {% if disqus %}
+
+<!-- Fixing the Disqus iframe transparency issue on some browsers -->
+<style>
+  :root {
+    color-scheme: light dark;
+  }
+  /* make sure Disqus iframe uses light mode */
+  iframe {
+    color-scheme: light;
+  }
+</style>
+
 <div id="disqus_thread"></div>
 <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
 <script>!function(w, d) {
@@ -10,15 +22,33 @@
         config() {
           this.page.url = w.location.href;
           this.page.title = d.title;
+          this.page.identifier = w.location.pathname.replace(/\/$/,'');
         },
       });
     } else {
       w.disqus_config = function disqusConfig() {
         this.page.url = w.location.href;
         this.page.title = d.title;
+        this.page.identifier = w.location.pathname.replace(/\/$/,'');
       };
-      w.loadJSDeferred(d.getElementById("_hrefDisqus").href + '/embed.js');
+      w.loadJSDeferred(d.getElementById("_hrefDisqus").href + 'embed.js');
     }
   }
+
+  d.addEventListener('hydejack-dark-mode-toggle', (e) => {
+    setTimeout(() => {
+      if (w.DISQUS) {
+        w.DISQUS.reset({
+          reload: true,
+          config: function () {
+            this.page.url = w.location.href;
+            this.page.title = d.title;
+            this.page.identifier = w.location.pathname.replace(/\/$/,'');
+          }
+        });
+      }
+    }, 500);
+  });
+
 }(window, document);</script>
 {% endif %}
