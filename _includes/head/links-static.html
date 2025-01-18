@@ -25,7 +25,7 @@
   <noscript><link rel="stylesheet" href="{{ katex_url }}"></noscript>
 {% endif %}
 
-{% assign disqus = site.disqus | default:site.disqus_shortname %}
+{% assign disqus = site.comments.disqus %}
 {% if disqus %}
-<link rel="dns-prefetch" href="https://{{ disqus }}.disqus.com" id="_hrefDisqus">
+<link rel="dns-prefetch" href="https://{{ disqus.shortname }}.disqus.com" id="_hrefDisqus">
 {% endif %}

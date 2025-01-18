@@ -1,5 +1,21 @@
-{% assign disqus = site.disqus | default:site.disqus_shortname %}
+{% assign provider = site.comments.provider | default: 'disqus' %}
+
+{% if provider == "disqus" %}
+
+{% assign disqus = site.comments.disqus %}
 {% if disqus %}
+
+<!-- Fixing the Disqus iframe transparency issue on some browsers -->
+<style>
+  :root {
+    color-scheme: light dark;
+  }
+  /* make sure Disqus iframe uses light mode */
+  iframe {
+    color-scheme: light;
+  }
+</style>
+
 <div id="disqus_thread"></div>
 <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
 <script>!function(w, d) {
@@ -10,15 +26,91 @@
         config() {
           this.page.url = w.location.href;
           this.page.title = d.title;
+          this.page.identifier = w.location.pathname.replace(/\/$/,'');
         },
       });
     } else {
       w.disqus_config = function disqusConfig() {
         this.page.url = w.location.href;
         this.page.title = d.title;
+        this.page.identifier = w.location.pathname.replace(/\/$/,'');
       };
-      w.loadJSDeferred(d.getElementById("_hrefDisqus").href + '/embed.js');
+      w.loadJSDeferred(d.getElementById("_hrefDisqus").href + 'embed.js');
     }
   }
+
+  d.addEventListener('hydejack-dark-mode-toggle', (e) => {
+    setTimeout(() => {
+      if (w.DISQUS) {
+        w.DISQUS.reset({
+          reload: true,
+          config: function () {
+            this.page.url = w.location.href;
+            this.page.title = d.title;
+            this.page.identifier = w.location.pathname.replace(/\/$/,'');
+          }
+        });
+      }
+    }, 500);
+  });
+
 }(window, document);</script>
+{% endif %}
+
+{% elsif provider == "waline" %}
+
+{% assign waline = site.comments.waline %}
+{% if waline %}
+<!-- Add light-mode or dark-mode label to body when missing -->
+<script>
+  (function() {
+    const list = document.body.classList;
+    if (
+      list.contains('dark-mode') || 
+      ('_sunset' in window && !list.contains('light-mode') && matchMedia('(prefers-color-scheme: dark)').matches) 
+    ) {
+      list.add('dark-mode'); 
+      document.documentElement.style.colorScheme = 'dark'; 
+    } else {
+      list.add('light-mode'); 
+      document.documentElement.style.colorScheme = 'light'; 
+    }
+  })();
+</script>
+
+<!-- Load Waline CSS -->
+<link rel="stylesheet" href="https://unpkg.com/@waline/client@v3/dist/waline.css"/>
+
+<!-- Overwrite theme colors -->
+<style>
+  body.dark-mode {
+    --waline-theme-color: #4a6e74;
+    --waline-active-color: #b4d7db;
+    --waline-color: #dddddd;
+    --waline-bg-color: #2a2f31;
+    --waline-bg-color-light: #2a2f31;
+  }
+  body.light-mode {
+    --waline-theme-color: #b4d7db;
+    --waline-active-color: #4a6e74;
+    --waline-color: #444;
+    --waline-bg-color: #fff;
+    --waline-bg-color-light: #f8f8f8;
+  }
+</style>
+
+<!-- Load Waline JS -->
+<div id="waline"></div>
+<script type="module">
+  import { init } from 'https://unpkg.com/@waline/client@v3/dist/waline.js';
+  const waline = init({
+    el: '#waline',
+    serverURL: '{{ waline.server }}',
+    dark: 'body.dark-mode',
+    lang: '{{ waline.locale | default: "en-US" }}',
+    path: window.location.pathname.replace(/\/$/,'')
+  });
+</script>
+{% endif %}
+
 {% endif %}
