@@ -178,6 +178,6 @@ The table below shows what's included in each version:
 [buy]: https://gum.co/nuOluY
 
 [gpss]: https://developers.google.com/speed/pagespeed/insights/?url=https%3A%2F%2Fhydejack.com%2Fdocs%2F
-[rouge]: http://rouge.jneen.net
+[rouge]: https://rouge-ruby.github.io/docs/
 [katex]: https://khan.github.io/KaTeX/
 [mathjax]: https://www.mathjax.org/
